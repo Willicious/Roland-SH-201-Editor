@@ -7,17 +7,22 @@
 ![JUCE 8](https://img.shields.io/badge/Framework-JUCE%208-00e5ff?style=for-the-badge&labelColor=11141a)
 ![License](https://img.shields.io/badge/License-MIT-00e5ff?style=for-the-badge&labelColor=11141a)
 
-A 64-bit **VST3 Plugin & Standalone Controller** for the **Roland SH-201 Hardware Synthesizer**, developed by **Transfict8 Audio Tools** to bring deep hardware control, complete session recall, and USB digital audio streaming to modern operating systems and DAWs.
+A 64-bit **VST3/AU Plugin & Standalone Controller** for the **Roland SH-201 Hardware Synthesizer**, developed by **Transfict8 Audio Tools** to bring deep hardware control, complete session recall, and USB digital audio streaming to modern operating systems and DAWs.
+
+AU support added by Willicious.
 
 ---
 
 ## Installation & Setup
 
-1. **Run the Installer**:
-   Download and execute the latest installer executable (`Roland_SH-201_Editor_Installer_vX.X.X.exe`). This installs the 64-bit VST3 plugin to your system's standard VST3 directory, the Standalone application, and documentation.
+1. **Mac - Download and Install Manually**:
+   Download the .zip from here: https://github.com/Willicious/Roland-SH-201-Editor/releases/ This contains the AU .component and Standalone .app versions of the Roland SH-201 Editor. Add the .component to `/Library/Audio/Plugins/Components`, and the .app to the Applications folder in Finder.
+   
+   **Windows - Run the Installer**:
+   Download and execute the latest installer executable from here: https://github.com/Trancsfict8/Roland-SH-201-Editor-Public/releases/ This installs the 64-bit VST3 plugin to your system's standard VST3 directory, the Standalone application, and documentation.
 
 2. **Choose Your Connection Mode**:
-   - **USB Connection (Audio + MIDI / MIDI Only)**: Connect the SH-201 to your computer via USB. Because official Roland 64-bit drivers are unavailable for modern Windows, a WinUSB driver is required. Please consult the documentation packaged with the installer (`HOW TO INSTALL DRIVER PLEASE READ.pdf`) for instructions on installing the driver using the bundled Zadig tool.
+   - **USB Connection (Audio + MIDI / MIDI Only)**: Connect the SH-201 to your computer via USB. **Windows Only**: Because official Roland 64-bit drivers are unavailable for modern Windows, a WinUSB driver is required. Please consult the documentation packaged with the installer (`HOW TO INSTALL DRIVER PLEASE READ.pdf`) for instructions on installing the driver using the bundled Zadig tool. NOTE: This step is not necessary on macOS.
    - **DIN MIDI Connection (No Driver Required)**: You can connect the SH-201 directly through any standard MIDI interface using standard 5-pin DIN MIDI cables. Open **System Settings** in the plugin header, select **DIN MIDI** as the Editor Mode, and choose your hardware MIDI In and MIDI Out ports. No custom USB driver installation is required.
 
 ---
@@ -82,8 +87,8 @@ Each tone layer features 48 parameters prefixed with `upper_` or `lower_`:
 
 ## Dependencies & Requirements
 
-* **Operating System**: Windows 10 / 11 (64-bit)
-* **Compiler / IDE**: Visual Studio 2022 (MSVC x64 toolset with C++20 support)
+* **Operating System**: Windows 10 / 11 (64-bit) or macOS 14 - 26 (Intel only - Apple Silicon not yet tested)
+* **Compiler / IDE**: Visual Studio 2022 (MSVC x64 toolset with C++20 support) or Xcode (Mac)
 * **Build System**: CMake 3.22 or higher
 * **JUCE Framework**: JUCE 8 (`v8.0.15`, automatically fetched by CMake via `FetchContent`)
 * **USB Driver & Library**: `libusb-1.0` (Pre-bundled in `third_party/libusb/`)
@@ -92,28 +97,13 @@ Each tone layer features 48 parameters prefixed with `upper_` or `lower_`:
 
 ## Building from Source
 
-### 1. Clone the Repository
-```powershell
-git clone https://github.com/Trancsfict8/Roland-SH-201-Total-Integration.git
-cd Roland-SH-201-Total-Integration
-```
+Roland SH-201 Editor is written in C++.
+Clone the repository and build using Microsoft Visual Studio (Windows) or Xcode (Mac).
 
-### 2. Configure with CMake
-Generate the Visual Studio x64 solution inside the `build/` directory:
-```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
-```
-
-### 3. Build in Release Mode
-Compile both the Standalone executable and the VST3 plugin bundle:
-```powershell
-cmake --build build --config Release
-```
-
-### 4. Locate Compiled Binaries
 Output artifacts are generated in:
-* **VST3 Plugin**: `build/SH201Editor_artefacts/Release/VST3/Roland SH-201 Editor.vst3`
-* **Standalone App**: `build/SH201Editor_artefacts/Release/Standalone/Roland SH-201 Editor.exe`
+* **AU Plugin**: `build/SH201Editor_artefacts/Release/AU/`
+* **VST3 Plugin**: `build/SH201Editor_artefacts/Release/VST3/`
+* **Standalone App**: `build/SH201Editor_artefacts/Release/Standalone/`
 
 ---
 
