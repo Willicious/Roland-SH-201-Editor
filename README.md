@@ -16,10 +16,10 @@ AU support added by Willicious.
 ## Installation & Setup
 
 1. **Mac - Download and Install Manually**:
-   Download the .zip from here: https://github.com/Willicious/Roland-SH-201-Editor/releases/ This contains the AU .component and Standalone .app versions of the Roland SH-201 Editor. Add the .component to `/Library/Audio/Plugins/Components`, and the .app to the Applications folder in Finder.
+   Download the .zip from [here](https://github.com/Willicious/Roland-SH-201-Editor/releases/). This contains the AU .component and Standalone .app versions of the Roland SH-201 Editor. Add the .component to `/Library/Audio/Plugins/Components`, and the .app to the Applications folder in Finder.
    
    **Windows - Run the Installer**:
-   Download and execute the latest installer executable from here: https://github.com/Trancsfict8/Roland-SH-201-Editor-Public/releases/ This installs the 64-bit VST3 plugin to your system's standard VST3 directory, the Standalone application, and documentation.
+   Download and execute the latest installer executable from [here](https://github.com/Trancsfict8/Roland-SH-201-Editor-Public/releases/). This installs the 64-bit VST3 plugin to your system's standard VST3 directory, the Standalone application, and documentation.
 
 2. **Choose Your Connection Mode**:
    - **USB Connection (Audio + MIDI / MIDI Only)**: Connect the SH-201 to your computer via USB.
@@ -88,7 +88,7 @@ Each tone layer features 48 parameters prefixed with `upper_` or `lower_`:
 
 ## Dependencies & Requirements
 
-* **Operating System**: Windows 10 / 11 (64-bit) or macOS 14 - 26 (Intel only - Apple Silicon not yet tested)
+* **Operating System**: Windows 10 / 11 (64-bit) or macOS High Sierra 10.13 - Tahoe 26.7.3 (Intel only - Apple Silicon not yet tested)
 * **Compiler / IDE**: Visual Studio 2022 (MSVC x64 toolset with C++20 support) or Xcode (Mac)
 * **Build System**: CMake 3.22 or higher
 * **JUCE Framework**: JUCE 8 (`v8.0.15`, automatically fetched by CMake via `FetchContent`)
