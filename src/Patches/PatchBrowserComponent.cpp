@@ -163,6 +163,7 @@ void PatchBrowserComponent::selectionChanged()
         if (f.existsAsFile() && (f.hasFileExtension (".syx") || f.hasFileExtension (".mid") || f.hasFileExtension (".midi")))
         {
             selectedFile = f;
+            handleLoadPatch();
         }
         else if (selectedFile.existsAsFile() && selectedFile.getParentDirectory() == currentFolder)
         {
