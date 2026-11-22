@@ -831,7 +831,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     setupLinkButton ("link_lfo1");
     setupLinkButton ("link_lfo2");
 
-    styleButton (upperPageButton, juce::Colour (0xffe74c3c));
+    styleButton (upperPageButton, juce::Colour (0xffd76454));
     upperPageButton.setButtonText ("UPPER TONE PAGE");
     upperPageButton.onClick = [this] {
         currentTonePage = TonePage::Upper;
@@ -939,6 +939,13 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     timerCallback();
 }
 
+juce::Colour SH201AudioProcessorEditor::toneColour() const
+{
+    return currentTonePage == TonePage::Upper
+        ? juce::Colour (0xffd76454)
+        : juce::Colour (0xff4169a8);
+}
+
 SH201AudioProcessorEditor::~SH201AudioProcessorEditor()
 {
     stopTimer();
@@ -946,10 +953,12 @@ SH201AudioProcessorEditor::~SH201AudioProcessorEditor()
 
 void SH201AudioProcessorEditor::updatePageButtons()
 {
-    upperPageButton.setColour (juce::TextButton::buttonColourId,
-                               currentTonePage == TonePage::Upper ? juce::Colour (0xffe74c3c) : juce::Colour (0xff4a525e));
-    lowerPageButton.setColour (juce::TextButton::buttonColourId,
-                               currentTonePage == TonePage::Lower ? juce::Colour (0xffe74c3c) : juce::Colour (0xff4a525e));
+    const bool isUpper = currentTonePage == TonePage::Upper;
+    const auto activeColour = toneColour();
+    const auto inactiveColour = juce::Colour (0xff4a525e);
+
+    upperPageButton.setColour (juce::TextButton::buttonColourId, isUpper ? activeColour : inactiveColour);
+    lowerPageButton.setColour (juce::TextButton::buttonColourId, isUpper ? inactiveColour : activeColour);
 }
 
 void SH201AudioProcessorEditor::updateViewModeVisibility()
@@ -1242,7 +1251,7 @@ juce::Image SH201AudioProcessorEditor::createBrushedMetalImage (int width, int h
     return img;
 }
 
-void SH201AudioProcessorEditor::drawSectionFrame (juce::Graphics& g, juce::Rectangle<int> bounds, const juce::String& title, const juce::String& badgeText, juce::Colour bgColour, juce::Colour textColour, juce::Colour borderColour)
+void SH201AudioProcessorEditor::drawSectionFrame (juce::Graphics& g, juce::Rectangle<int> bounds, const juce::String& title, const juce::Colour bgColour, juce::Colour textColour, juce::Colour borderColour, bool isToneDependent)
 {
     float pi = juce::MathConstants<float>::pi;
     float x = bounds.getX();
@@ -1254,9 +1263,9 @@ void SH201AudioProcessorEditor::drawSectionFrame (juce::Graphics& g, juce::Recta
     float tabH = 28.0f; // Height of the file tab
     float tabSlope = 18.0f; // Sloped edge width
     
-    juce::Font titleFont (juce::FontOptions ("Impact", 18.0f, juce::Font::plain));
-    float textW = title.length() * 11.0f; // Heuristic for 18pt Impact uppercase font
-    float tabW = textW + 24.0f; // Give padding around title
+    juce::Font titleFont (juce::FontOptions ("Trebuchet MS", 18.0f, juce::Font::bold));
+    float titleW = title.length() * 11.0f; // Heuristic for 18pt Impact uppercase font
+    float tabW = titleW + 20.0f; // Give padding around title
     
     // Ensure tab doesn't overshoot the panel's right edge
     if (tabW + tabSlope > w - corner)
@@ -1296,19 +1305,18 @@ void SH201AudioProcessorEditor::drawSectionFrame (juce::Graphics& g, juce::Recta
         g.fillPath (p);
     }
     
+    float thickness = borderColour == juce::Colour (0xffe2e5e8) ? 1.5f : 3.0f;
     g.setColour (borderColour);
-    g.strokePath (p, juce::PathStrokeType (1.5f));
+    g.strokePath (p, juce::PathStrokeType (thickness));
     
-    g.setColour (textColour);
     g.setFont (titleFont);
     // Draw title in the center of the tab
+    g.setColour (textColour);
     g.drawText (title, (int)x + 12, (int)y + 2, (int)tabW, (int)tabH, juce::Justification::centredLeft, false);
-    
-    if (badgeText.isNotEmpty())
-    {
-        g.setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::plain)));
-        g.drawText (badgeText, (int)x, (int)y + (int)tabH + 2, (int)w - 12, 14, juce::Justification::topRight, false);
-    }
+    // Draw tone label on the right of the tab
+    g.setColour (toneColour());
+    juce::String tone = isToneDependent ? (currentTonePage == TonePage::Upper ? "U" : "L") : "";
+    g.drawText(tone, (int)x + tabW - 16, (int)y + 2, (int)tabW, (int)tabH, juce::Justification::centredLeft, false);
 }
 
 void SH201AudioProcessorEditor::paint (juce::Graphics& g)
@@ -1338,6 +1346,7 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
 
     juce::Colour silverBg (0xffd1d5d9);
     juce::Colour silverBorder (0xffe2e5e8);
+    juce::Colour borderColor = toneColour();
     juce::Colour silverText (0xff111111);
 
     juce::Colour darkBg (0xff363c45);
@@ -1345,29 +1354,28 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
     juce::Colour darkText (0xffffffff);
 
     // --- STATIC COMMON / MASTER SECTION FRAMES (Always Visible) ---
-    drawSectionFrame (g, { 15,  60,  270, 150 }, "PATCH COMMON", "", darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 300, 60,  360, 150 }, "VOICE & PERFORM", "", darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 675, 60,  270, 150 }, "MASTER EFFECTS", "", darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 960, 60,  305, 150 }, "STEREO MODE (VST)", "", darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 15,  60,  270, 150 }, "PATCH COMMON", darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 300, 60,  360, 150 }, "VOICE & PERFORM", darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 675, 60,  270, 150 }, "MASTER EFFECTS", darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 960, 60,  305, 150 }, "STEREO MODE (VST)", darkBg, darkText, darkBorder);
 
     // --- TONE PAGE TOGGLE BAR ---
     g.setColour (juce::Colour (0xff2e333d));
     g.fillRoundedRectangle (15.0f, 225.0f, 1250.0f, 50.0f, 6.0f);
 
     // --- DYNAMIC TONE SECTION FRAMES (Swaps between Upper / Lower) ---
-    juce::String pageLabel = currentTonePage == TonePage::Upper ? "[UPPER TONE]" : "[LOWER TONE]";
-    drawSectionFrame (g, { 15,  290, 390, 190 }, "OSCILLATOR 1", pageLabel, silverBg, silverText, silverBorder);
-    drawSectionFrame (g, { 420, 290, 390, 190 }, "OSCILLATOR 2", pageLabel, silverBg, silverText, silverBorder);
-    drawSectionFrame (g, { 825, 290, 240, 190 }, "MIX / MOD", pageLabel, silverBg, silverText, silverBorder);
-    drawSectionFrame (g, { 1080, 290, 185, 190 }, "PITCH ENVELOPE", pageLabel, darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 15,  290, 390, 190 }, "OSCILLATOR 1", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, { 420, 290, 390, 190 }, "OSCILLATOR 2", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, { 825, 290, 240, 190 }, "MIX / MOD", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, { 1080, 290, 185, 190 }, "PITCH ENV", darkBg, darkText, borderColor, true);
 
-    drawSectionFrame (g, { 15,  495, 420, 214 }, "FILTER", pageLabel, silverBg, silverText, silverBorder);
-    drawSectionFrame (g, { 450, 495, 470, 214 }, "FILTER ENVELOPE", pageLabel, darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 935, 495, 330, 214 }, "AMP ENVELOPE", pageLabel, darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 15,  495, 420, 214 }, "FILTER", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, { 450, 495, 470, 214 }, "FILTER ENVELOPE", darkBg, darkText, borderColor, true);
+    drawSectionFrame (g, { 935, 495, 330, 214 }, "AMP ENVELOPE", darkBg, darkText, borderColor, true);
 
-    drawSectionFrame (g, { 15,  724, 420, 190 }, "AMP & OVERDRIVE", pageLabel, silverBg, silverText, silverBorder);
-    drawSectionFrame (g, { 450, 724, 405, 190 }, "LFO 1", pageLabel, darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 870, 724, 395, 190 }, "LFO 2", pageLabel, darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 15,  724, 420, 190 }, "AMP & OVERDRIVE", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, { 450, 724, 405, 190 }, "LFO 1  ", darkBg, darkText, borderColor, true);
+    drawSectionFrame (g, { 870, 724, 395, 190 }, "LFO 2  ", darkBg, darkText, borderColor, true);
 
     // Draw visual linking lines for Osc 1 and 2 pitch wide dropdowns
     auto drawPitchLine = [this, &g] (const juce::String& prefix, bool isOsc1)

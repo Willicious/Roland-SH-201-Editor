@@ -229,6 +229,8 @@ private:
     enum class ViewMode { Editor, Browser };
     ViewMode currentViewMode = ViewMode::Editor;
 
+    juce::Colour toneColour() const;
+
     juce::TextButton upperPageButton;
     juce::TextButton lowerPageButton;
     juce::TextButton initPatchButton;
@@ -283,11 +285,11 @@ private:
     void updatePitchSliderRange (const juce::String& pitchParamId, bool isWide);
     void updateAllPitchSliderRanges();
 
-    void drawSectionFrame (juce::Graphics& g, juce::Rectangle<int> bounds, const juce::String& title, 
-                           const juce::String& badgeText = "",
-                           juce::Colour bgColour = juce::Colour (0xff161a22), 
-                           juce::Colour textColour = juce::Colour (0xff00e5ff), 
-                           juce::Colour borderColour = juce::Colour (0xff28303d));
+    void drawSectionFrame (juce::Graphics& g, juce::Rectangle<int> bounds, const juce::String& title,
+                           const juce::Colour bgColour = juce::Colour (0xff161a22),
+                           juce::Colour textColour = juce::Colour (0xff00e5ff),
+                           juce::Colour borderColour = juce::Colour (0xff28303d),
+                           bool isToneDependent = false);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SH201AudioProcessorEditor)
 };
