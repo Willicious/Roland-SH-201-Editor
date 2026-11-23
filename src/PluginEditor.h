@@ -205,8 +205,9 @@ private:
     SH201AudioProcessor& audioProcessor;
 
     // Header & Status UI
+    juce::Label logoLabel;
+    juce::Label versionLabel;
     juce::Label titleLabel;
-    juce::Label subtitleLabel;
     juce::Label statusLabel;
     juce::Label lastReceivedLabel;
     juce::TextButton reconnectButton;

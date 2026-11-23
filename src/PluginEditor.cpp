@@ -545,21 +545,21 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     brushedMetalTexture = createBrushedMetalImage (512, 512);
 
     // --- Header Title ---
-    titleLabel.setText ("ROLAND SH-201", juce::dontSendNotification);
-    titleLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 22.0f, juce::Font::bold)));
-    titleLabel.setColour (juce::Label::textColourId, juce::Colour (0xff111111));
-    titleLabel.setJustificationType (juce::Justification::centred);
-    addAndMakeVisible (titleLabel);
+    logoLabel.setText ("Roland SH-201 EDITOR", juce::dontSendNotification);
+    logoLabel.setFont (juce::Font (juce::FontOptions ("Helvetica Neue", 34.0f, juce::Font::bold | juce::Font::italic)));
+    logoLabel.setColour (juce::Label::textColourId, juce::Colour (0xff4169a8));
+    logoLabel.setJustificationType (juce::Justification::centredLeft);
+    addAndMakeVisible (logoLabel);
 
-    subtitleLabel.setText ("EDITOR VST v1.2.1", juce::dontSendNotification);
-    subtitleLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
-    subtitleLabel.setColour (juce::Label::textColourId, juce::Colour (0xff8a93a0));
-    subtitleLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (subtitleLabel);
+    versionLabel.setText ("Version 1.2.2", juce::dontSendNotification);
+    versionLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
+    versionLabel.setColour (juce::Label::textColourId, juce::Colour (0xff8a93a0));
+    versionLabel.setJustificationType (juce::Justification::centredLeft);
+    addAndMakeVisible (versionLabel);
 
     // --- Status Label ---
     statusLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 12.0f, juce::Font::bold)));
-    statusLabel.setJustificationType (juce::Justification::centred);
+    statusLabel.setJustificationType (juce::Justification::right);
     addAndMakeVisible (statusLabel);
 
     // --- Header Buttons ---
@@ -601,7 +601,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     // --- Footer Label ---
     lastReceivedLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 12.0f, juce::Font::bold)));
     lastReceivedLabel.setColour (juce::Label::textColourId, juce::Colours::white);
-    lastReceivedLabel.setJustificationType (juce::Justification::centred);
+    lastReceivedLabel.setJustificationType (juce::Justification::right);
     addAndMakeVisible (lastReceivedLabel);
 
     // Helper to add all 48 Tone controls for a given prefix ("upper_" or "lower_")
@@ -832,7 +832,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     setupLinkButton ("link_lfo2");
 
     styleButton (upperPageButton, juce::Colour (0xffd76454));
-    upperPageButton.setButtonText ("UPPER TONE PAGE");
+    upperPageButton.setButtonText ("UPPER TONE");
     upperPageButton.onClick = [this] {
         currentTonePage = TonePage::Upper;
         updatePageButtons();
@@ -843,7 +843,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     addAndMakeVisible (upperPageButton);
 
     styleButton (lowerPageButton, juce::Colour (0xff4a525e));
-    lowerPageButton.setButtonText ("LOWER TONE PAGE");
+    lowerPageButton.setButtonText ("LOWER TONE");
     lowerPageButton.onClick = [this] {
         currentTonePage = TonePage::Lower;
         updatePageButtons();
@@ -1332,12 +1332,6 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour (juce::Colour (0xffb4afaa));
     g.fillRect (0, 55, 1280, 2);
 
-    // Title Background (matches Osc Controls Panel style)
-    g.setColour (juce::Colour (0xffd1d5d9));
-    g.fillRoundedRectangle (15.0f, 6.0f, 190.0f, 26.0f, 4.0f);
-    g.setColour (juce::Colour (0xffe2e5e8));
-    g.drawRoundedRectangle (15.0f, 6.0f, 190.0f, 26.0f, 4.0f, 1.0f);
-
     // --- Bottom Footer Panel ---
     g.setColour (juce::Colour (0xff2e333d));
     g.fillRect (0, 920 - 28, 1280, 28);
@@ -1454,26 +1448,24 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
 void SH201AudioProcessorEditor::resized()
 {
     // --- Header Layout ---
-    titleLabel.setBounds    (15,  8, 190, 22);
-    subtitleLabel.setBounds (20,  34, 250, 16);
-    statusLabel.setBounds       (250, 8, 400, 22);
-    lastReceivedLabel.setBounds (250, 30, 400, 22);
-
-    globalSettingsButton.setBounds (680, 13, 120, 28);
-
-    pullPatchButton.setBounds      (915, 13, 95, 28);
-    reconnectButton.setBounds      (1020, 13, 105, 28);
+    logoLabel.setBounds         (15,   8, 340, 48);
+    versionLabel.setBounds      (340, 30, 400, 22);
+    statusLabel.setBounds       (870,  8, 400, 22);
+    lastReceivedLabel.setBounds (870, 30, 400, 22);
 
     if (patchBrowser)
         patchBrowser->setBounds (15, 55, 1280 - 30, 920 - 85);
 
     // --- Footer Layout ---
 
-    // --- Tone Page Toggle Button Layout ---
-    upperPageButton.setBounds    (300, 233, 240, 34);
-    lowerPageButton.setBounds    (550, 233, 240, 34);
-    initPatchButton.setBounds    (800, 233, 130, 34);
-    patchBrowserButton.setBounds (940, 233, 160, 34);
+    // --- Button Layout ---
+    patchBrowserButton.setBounds   (  15, 233, 160, 34);
+    initPatchButton.setBounds      ( 185, 233, 140, 34);
+    upperPageButton.setBounds      ( 360, 233, 255, 34);
+    lowerPageButton.setBounds      ( 625, 233, 255, 34);
+    globalSettingsButton.setBounds ( 915, 233, 110, 34);
+    pullPatchButton.setBounds      (1035, 233, 110, 34);
+    reconnectButton.setBounds      (1155, 233, 110, 34);
 
     // Helper: find a slider or combo by paramId and set its bounds within a cell.
     // Also finds and positions the associated label above the control.
