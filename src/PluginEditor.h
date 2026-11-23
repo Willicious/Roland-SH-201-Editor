@@ -210,7 +210,7 @@ private:
     juce::Label statusLabel;
     juce::Label lastReceivedLabel;
     juce::TextButton reconnectButton;
-    juce::TextButton systemSettingsButton;
+    juce::TextButton globalSettingsButton;
     juce::TextButton patchBrowserButton;
 
     juce::Image brushedMetalTexture;

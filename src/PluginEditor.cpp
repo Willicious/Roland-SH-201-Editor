@@ -2,10 +2,10 @@
 #include "PluginEditor.h"
 #include "Utils/GlobalSettings.h"
 
-class SystemSettingsComponent : public juce::Component
+class GlobalSettingsComponent : public juce::Component
 {
 public:
-    SystemSettingsComponent (SH201AudioProcessorEditor& editor, SH201AudioProcessor& p, SH201LookAndFeel& lf)
+    GlobalSettingsComponent (SH201AudioProcessorEditor& editor, SH201AudioProcessor& p, SH201LookAndFeel& lf)
     {
         auto setupSlider = [this, &p, &lf] (const juce::String& paramId, const juce::String& name)
         {
@@ -577,11 +577,11 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         timerCallback();
     };
 
-    styleButton (systemSettingsButton, juce::Colour (0xff444466));
-    systemSettingsButton.setButtonText ("SYSTEM SETTINGS");
-    systemSettingsButton.onClick = [this] {
-        auto* comp = new SystemSettingsComponent (*this, audioProcessor, customLookAndFeel);
-        juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component>(comp), systemSettingsButton.getScreenBounds(), nullptr);
+    styleButton (globalSettingsButton, juce::Colour (0xff444466));
+    globalSettingsButton.setButtonText ("GLOBAL");
+    globalSettingsButton.onClick = [this] {
+        auto* comp = new GlobalSettingsComponent (*this, audioProcessor, customLookAndFeel);
+        juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component>(comp), globalSettingsButton.getScreenBounds(), nullptr);
     };
 
     styleButton (patchBrowserButton, juce::Colour (0xff3d5a80));
@@ -788,9 +788,9 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
             btn.setComponentEffect (&glow);
     };
 
-    initFxButton (delaySwitchButton, delaySwitchAttachment, "common_delay_switch", "DLY SW", delayGlow);
+    initFxButton (delaySwitchButton, delaySwitchAttachment, "common_delay_switch", "DELAY", delayGlow);
     addRotarySlider ("common_delay_level", "DELAY");
-    initFxButton (reverbSwitchButton, reverbSwitchAttachment, "common_reverb_switch", "REV SW", reverbGlow);
+    initFxButton (reverbSwitchButton, reverbSwitchAttachment, "common_reverb_switch", "REVERB", reverbGlow);
     addRotarySlider ("common_reverb_level", "REVERB");
 
     // --- STEREO MODE (SH-201 EDITOR) ---
@@ -1459,7 +1459,7 @@ void SH201AudioProcessorEditor::resized()
     statusLabel.setBounds       (250, 8, 400, 22);
     lastReceivedLabel.setBounds (250, 30, 400, 22);
 
-    systemSettingsButton.setBounds (680, 13, 120, 28);
+    globalSettingsButton.setBounds (680, 13, 120, 28);
 
     pullPatchButton.setBounds      (915, 13, 95, 28);
     reconnectButton.setBounds      (1020, 13, 105, 28);
@@ -2046,18 +2046,18 @@ void SH201AudioProcessorEditor::resized()
         }
     };
     
-    positionLinkButton (0, { 15,  290, 390, 190 }); // OSC 1
-    positionLinkButton (1, { 420, 290, 390, 190 }); // OSC 2
-    positionLinkButton (2, { 825, 290, 240, 190 }); // MIX / MOD
-    positionLinkButton (3, { 1080, 290, 185, 190 }); // PITCH ENV
+    positionLinkButton (0, { 25,  290, 390, 190 }); // OSC 1
+    positionLinkButton (1, { 430, 290, 390, 190 }); // OSC 2
+    positionLinkButton (2, { 835, 290, 240, 190 }); // MIX / MOD
+    positionLinkButton (3, { 1090, 290, 185, 190 }); // PITCH ENV
 
-    positionLinkButton (4, { 15,  495, 420, 214 }); // FILTER
-    positionLinkButton (5, { 450, 495, 470, 214 }); // FILTER ENV
-    positionLinkButton (6, { 935, 495, 330, 214 }); // AMP ENV
+    positionLinkButton (4, { 25,  495, 420, 214 }); // FILTER
+    positionLinkButton (5, { 460, 495, 470, 214 }); // FILTER ENV
+    positionLinkButton (6, { 945, 495, 330, 214 }); // AMP ENV
 
-    positionLinkButton (7, { 15,  724, 420, 190 }); // AMP & OVERDRIVE
-    positionLinkButton (8, { 450, 724, 405, 190 }); // LFO 1
-    positionLinkButton (9, { 870, 724, 395, 190 }); // LFO 2
+    positionLinkButton (7, { 25,  724, 420, 190 }); // AMP & OVERDRIVE
+    positionLinkButton (8, { 460, 724, 405, 190 }); // LFO 1
+    positionLinkButton (9, { 880, 724, 395, 190 }); // LFO 2
 
     float scale = (float) getWidth() / 1280.0f;
     for (auto* child : getChildren())
