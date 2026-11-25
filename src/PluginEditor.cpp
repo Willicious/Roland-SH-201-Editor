@@ -603,52 +603,86 @@ public:
             items.push_back ({ c, l, false });
         };
 
-        setupSlider ("patch_delay_time", "Dly Time");
-        setupSlider ("patch_delay_feedback", "Dly Fdbk");
-        setupCombo  ("patch_delay_hf_damp", "Dly HF Damp", { "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500", "3150", "4000", "5000", "6300", "8000", "BYPASS" });
-        setupSlider ("patch_delay_mod_rate", "Dly Mod Rate");
-        setupSlider ("patch_delay_mod_depth", "Dly Mod Dpth");
+        auto setupPresetCombo = [this, &lf] (juce::ComboBox& c, const juce::StringArray& choices)
+        {
+            c.setLookAndFeel (&lf);
+            c.addItemList (choices, 1);
+            c.setSelectedId (9, juce::dontSendNotification);
+            c.setColour (juce::ComboBox::backgroundColourId, juce::Colour (0xff2e333d));
+            c.setColour (juce::ComboBox::textColourId, juce::Colours::white);
+            c.setColour (juce::ComboBox::outlineColourId, juce::Colour (0xff555555));
+            c.setColour (juce::ComboBox::arrowColourId, juce::Colours::white);
+            addAndMakeVisible (c);
+        };
 
-        setupSlider ("patch_reverb_time", "Rev Time");
-        setupSlider ("patch_reverb_pre_delay", "Rev Pre Dly");
-        setupSlider ("patch_reverb_size", "Rev Size");
-        setupCombo  ("patch_reverb_high_cut", "Rev High Cut", { "160", "200", "250", "320", "400", "500", "640", "800", "1000", "1250", "1600", "2000", "2500", "3200", "4000", "5000", "6400", "8000", "10K", "12.5K", "BYP" });
-        setupSlider ("patch_reverb_density", "Rev Density");
-        setupSlider ("patch_reverb_diffusion", "Rev Diffuse");
-        setupCombo  ("patch_reverb_lf_damp_freq", "Rev LF Freq", { "50", "64", "80", "100", "125", "160", "200", "250", "320", "400", "500", "640", "800", "1000", "1250", "1600", "2000", "2500", "3200", "4000" });
-        setupSlider ("patch_reverb_lf_damp_gain", "Rev LF Gain");
-        setupCombo  ("patch_reverb_hf_damp_freq", "Rev HF Freq", { "4000", "5000", "6400", "8000", "10000", "12500" });
-        setupSlider ("patch_reverb_hf_damp_gain", "Rev HF Gain");
-
-        setSize (600, 300);
+        setupPresetCombo (delayPresetCombo, juce::StringArray ("Delay 1", "Delay 2", "Delay 3", "Delay 4", "Delay 5", "Delay 6", "Delay 7", "Delay 8", "Custom")); // TODO - implement these
+        setupPresetCombo (reverbPresetCombo, juce::StringArray ("Reverb 1", "Reverb 2", "Reverb 3", "Reverb 4", "Reverb 5", "Reverb 6", "Reverb 7", "Reverb 8", "Custom")); // TODO - implement these
+        
+        setupSlider ("patch_delay_time", "Delay Time");
+        setupSlider ("patch_delay_feedback", "Delay Feedback");
+        setupCombo  ("patch_delay_hf_damp", "Delay HF Damp", { "200", "250", "315", "400", "500", "630", "800", "1000", "1250", "1600", "2000", "2500", "3150", "4000", "5000", "6300", "8000", "Bypass" });
+        setupSlider ("patch_delay_mod_rate", "Delay Mod Rate");
+        setupSlider ("patch_delay_mod_depth", "Delay Mod Depth");
+        setupSlider ("patch_reverb_pre_delay", "Reverb Pre-Delay");
+        setupSlider ("patch_reverb_time", "Reverb Time");
+        setupSlider ("patch_reverb_size", "Reverb Size");
+        setupSlider ("patch_reverb_density", "Reverb Density");
+        setupSlider ("patch_reverb_diffusion", "Reverb Diffusion");
+        setupCombo  ("patch_reverb_lf_damp_freq", "Reverb LF Freq", { "50", "64", "80", "100", "125", "160", "200", "250", "320", "400", "500", "640", "800", "1000", "1250", "1600", "2000", "2500", "3200", "4000" });
+        setupSlider ("patch_reverb_lf_damp_gain", "Reverb LF Gain");
+        setupCombo  ("patch_reverb_hf_damp_freq", "Reverb HF Freq", { "4000", "5000", "6400", "8000", "10000", "12500" });
+        setupSlider ("patch_reverb_hf_damp_gain", "Reverb HF Gain");
+        setupCombo  ("patch_reverb_high_cut", "Reverb High Cut", { "160", "200", "250", "320", "400", "500", "640", "800", "1000", "1250", "1600", "2000", "2500", "3200", "4000", "5000", "6400", "8000", "10000", "12500", "Bypass" });
+        
+        setSize (640, 440);
     }
-
+    
     void paint (juce::Graphics& g) override
     {
         g.fillAll (juce::Colour (0xff363c45));
-        g.setColour (juce::Colour (0xff4a525e));
-        g.drawRect (getLocalBounds(), 2);
-    }
+        g.setColour (juce::Colours::white);
+        g.setFont (juce::Font (juce::FontOptions ("Trebuchet MS", 16.0f, juce::Font::bold)));
+        g.drawText ("DELAY", 0, 8, getWidth(), 18, juce::Justification::centred);
 
+        g.setColour (juce::Colour (0xff555555));
+        g.drawHorizontalLine (168, 8.0f, (float) getWidth() - 8.0f);
+
+        g.setColour (juce::Colours::white);
+        g.drawText ("REVERB", 0, 180, getWidth(), 18, juce::Justification::centred);
+    }
+    
     void resized() override
     {
-        int cols = 5;
-        int cellW = getWidth() / cols;
-        int cellH = getHeight() / 3;
-        
-        for (int i = 0; i < (int) items.size(); ++i)
-        {
-            int r = i / cols;
-            int c = i % cols;
-            auto box = juce::Rectangle<int> (c * cellW, r * cellH, cellW, cellH).reduced (4);
-            items[i].label->setBounds (box.removeFromTop (18));
-            if (items[i].isSlider)
-                items[i].control->setBounds (box.withSizeKeepingCentre (54, 66));
-            else
-                items[i].control->setBounds (box.withSizeKeepingCentre (box.getWidth() - 8, 24));
-        }
-    }
+        const int width = getWidth();
 
+        const int headerHeight = 18;
+        const int presetHeight = 24;
+        const int rowHeight = 76;
+
+        const int columnWidth = width / 5;
+
+        // Delay section
+        int y = 30;
+
+        delayPresetCombo.setBounds ((width - 180) / 2, y, 180, presetHeight);
+        y += presetHeight + 16;
+
+        for (int i = 0; i < 5; ++i)
+            positionItem (items[i], i * columnWidth, y, columnWidth);
+
+        // Reverb section
+        y = 198;
+
+        reverbPresetCombo.setBounds ((width - 180) / 2, y, 180, presetHeight);
+        y += presetHeight + 16;
+        for (int i = 5; i < 10; ++i)
+            positionItem (items[i], (i - 5) * columnWidth, y, columnWidth);
+
+        y += rowHeight + 24;
+        for (int i = 10; i < 15; ++i)
+            positionItem (items[i], (i - 10) * columnWidth, y, columnWidth);
+    }
+    
 private:
     struct ControlItem { juce::Component* control; juce::Label* label; bool isSlider; };
     std::vector<ControlItem> items;
@@ -657,6 +691,17 @@ private:
     juce::OwnedArray<juce::Label> labels;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachments;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboAttachments;
+    juce::ComboBox delayPresetCombo;
+    juce::ComboBox reverbPresetCombo;
+    void positionItem (ControlItem& item, int x, int y, int columnWidth)
+    {
+        if (item.isSlider)
+            item.control->setBounds (x + 4, y + 16, columnWidth - 8, 60);
+        else
+            item.control->setBounds (x + (columnWidth - 100) / 2, y + 34, 100, 24);
+
+        item.label->setBounds (x + 4, y, columnWidth - 8, 16);
+    }
 };
 
 SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
