@@ -391,6 +391,26 @@ public:
             sliderAttachments.add (new juce::AudioProcessorValueTreeState::SliderAttachment (p.getAPVTS(), paramId, *s));
             sliderMap.push_back ({ s, l, paramId });
         };
+        
+        auto setupToggle = [this, &p, &lf] (const juce::String& paramId, const juce::String& name)
+        {
+            auto* t = toggleButtons.add (new juce::ToggleButton());
+            auto* l = labels.add (new juce::Label());
+
+            t->setButtonText ({});
+            t->setClickingTogglesState (true);
+            t->setLookAndFeel (&lf);
+            addAndMakeVisible (t);
+
+            l->setText (name, juce::dontSendNotification);
+            l->setColour (juce::Label::textColourId, juce::Colours::white);
+            l->setJustificationType (juce::Justification::centredLeft);
+            l->setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
+            addAndMakeVisible (l);
+
+            toggleAttachments.add (new juce::AudioProcessorValueTreeState::ButtonAttachment (p.getAPVTS(), paramId, *t));
+            toggleMap.push_back ({ t, l, paramId });
+        };
 
         auto setupCombo = [this, &p] (const juce::String& paramId, const juce::String& name, const juce::StringArray& items)
         {
@@ -405,7 +425,7 @@ public:
             
             l->setText (name, juce::dontSendNotification);
             l->setColour (juce::Label::textColourId, juce::Colours::white);
-            l->setJustificationType (juce::Justification::centred);
+            l->setJustificationType (juce::Justification::centredRight);
             l->setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
             addAndMakeVisible (l);
             
@@ -413,22 +433,25 @@ public:
             comboMap.push_back ({ c, l, paramId });
         };
 
-        setupSlider ("common_patch_level", "Patch Lvl");
+        setupSlider ("common_patch_level", "Patch Level");
         setupSlider ("common_patch_tempo", "Tempo");
-        setupCombo  ("common_keyboard_part", "KBD Part", { "UPPER", "LOWER" });
-        setupCombo  ("common_split_arpeggio", "Split Arp", { "UPPER", "LOWER", "BOTH" });
-        setupCombo  ("common_mod_destination", "Mod Dest", { "UPPER", "LOWER", "BOTH" });
-        setupCombo  ("common_dbeam_destination", "DBeam Dest", { "UPPER", "LOWER", "BOTH" });
-        setupCombo  ("common_pitch_bend_destination", "Bend Dest", { "UPPER", "LOWER", "BOTH" });
-        setupCombo  ("common_expression_destination", "Expr Dest", { "UPPER", "LOWER", "BOTH" });
-        setupCombo  ("common_active_expression_switch", "ActExpr Sw", { "OFF", "ON" });
-        setupCombo  ("common_arpeggio_switch", "Arp Sw", { "OFF", "ON" });
-        setupCombo  ("common_arpeggio_hold", "Arp Hold", { "OFF", "ON" });
-        setupCombo  ("common_modulation_assign", "Mod Asgn", { "OSC1&2", "OSC1", "OSC2", "PW1", "PW2", "FILTER", "AMP", "AUD-FILT" });
-        setupCombo  ("common_dbeam_assign", "DBeam Asgn", { "O1-PITCH", "O1-DETUNE", "O1-PW", "O2-PITCH", "O2-DETUNE", "O2-PW", "MIX-BAL", "FILT-CUT", "FILT-RES", "FILT-KEYFOL", "AMP-LEVEL", "AUD-CUT", "AUD-RES", "P-ENV-A", "P-ENV-D", "O1-P-DEP", "O2-P-DEP", "LFO1-RATE", "LFO1-DEP1", "LFO1-DEP2", "LFO2-RATE", "LFO2-DEP1", "LFO2-DEP2", "F-ENV-A", "F-ENV-D", "F-ENV-S", "F-ENV-R", "F-ENV-DEP", "A-ENV-A", "A-ENV-D", "A-ENV-S", "A-ENV-R", "DLY-TIME", "DLY-DEP", "REV-TIME", "REV-DEP", "BENDER" });
-        setupCombo  ("common_dbeam_polarity", "DBeam Pol", { "NORMAL", "REVERSE" });
+        
+        setupToggle ("common_active_expression_switch", "Active Expression Switch");
+        setupToggle ("common_arpeggio_switch", "Arp Switch");
+        setupToggle ("common_arpeggio_hold", "Arp Hold");
+        
+        setupCombo  ("common_keyboard_part", "KBD Part", { "Upper", "Lower" });
+        setupCombo  ("common_split_arpeggio", "Split Arpeggio", { "Upper", "Lower", "Both" });
+        setupCombo  ("common_mod_destination", "Mod Dest", { "Upper", "Lower", "Both" });
+        setupCombo  ("common_dbeam_destination", "D-Beam Dest", { "Upper", "Lower", "Both" });
+        setupCombo  ("common_pitch_bend_destination", "Bend Dest", { "Upper", "Lower", "Both" });
+        setupCombo  ("common_expression_destination", "Expression Dest", { "Upper", "Lower", "Both" });
 
-        setSize (600, 300);
+        setupCombo  ("common_modulation_assign", "Mod Wheel Assign", { "Osc 1&2", "Osc 1", "Osc 2", "Osc 1 Pulse Width", "Osc 2 Pulse Width", "Filter", "Amp Level", "Audio Filter" });
+        setupCombo  ("common_dbeam_assign", "D-Beam Assign", { "Osc 1 Pitch", "Osc 1 Detune", "Osc 1 Pulse Width", "Osc 2 Pitch", "Osc 2 Detune", "Osc 2 Pulse Width", "Osc Mix Balance", "Filter Cutoff", "Filter Resonance", "Filter KeyFollow", "Amp Level", "Audio Filter Cutoff", "Audio Filter Resonance", "Pitch Env Attack", "Pitch Env Decay", "Osc 1 Pitch Depth", "Osc 2 Pitch Depth", "LFO 1 Rate", "LFO 1 Depth 1", "LFO 1 Depth 2", "LFO 2 Rate", "LFO 2 Depth 1", "LFO 2 Depth 2", "Filter Env Attack", "Filter Env Decay", "Filter Env Sustain", "Filter Env Release", "Filter Env Depth", "Amp Env Attack", "Amp Env Decay", "Amp Env Sustain", "Amp Env Release", "Delay Time", "Delay Depth", "Reverb Time", "Reverb Depth", "Bender" });
+        setupCombo  ("common_dbeam_polarity", "D-Beam Polarity", { "Normal", "Reverse" });
+
+        setSize (600, 400);
     }
 
     void paint (juce::Graphics& g) override
@@ -440,41 +463,92 @@ public:
 
     void resized() override
     {
-        int cols = 5;
-        int cellW = getWidth() / cols;
-        int cellH = getHeight() / 3;
-        
-        int i = 0;
-        for (auto& item : sliderMap)
+        auto area = getLocalBounds().reduced (10);
+
+        // Top section
+        const int topHeight = 110;
+        const int sliderWidth = 105;
+        const int toggleWidth = 240;
+
+        auto topArea = area.removeFromTop (topHeight);
+
+        topArea.removeFromLeft (60);
+        auto sliderArea = topArea.removeFromLeft (sliderWidth * 2);
+        topArea.removeFromLeft (32);
+        auto toggleArea = topArea.removeFromLeft (toggleWidth);
+
+        // Two rotary sliders
+        for (int i = 0; i < sliderMap.size(); ++i)
         {
-            int r = i / cols;
-            int c = i % cols;
-            auto box = juce::Rectangle<int> (c * cellW, r * cellH, cellW, cellH).reduced (4);
-            item.label->setBounds (box.removeFromTop (18));
-            item.slider->setBounds (box.withSizeKeepingCentre (54, 66));
-            i++;
+            auto box = sliderArea.removeFromLeft (sliderWidth).reduced (4);
+
+            sliderMap[i].label->setBounds (box.removeFromTop (18));
+            sliderMap[i].slider->setBounds (box.withSizeKeepingCentre (66, 72));
         }
-        for (auto& item : comboMap)
+
+        // Three toggle buttons
+        const int toggleRowH = topHeight / 3;
+        for (int i = 0; i < toggleMap.size(); ++i)
         {
-            int r = i / cols;
-            int c = i % cols;
-            auto box = juce::Rectangle<int> (c * cellW, r * cellH, cellW, cellH).reduced (4);
-            item.label->setBounds (box.removeFromTop (18));
-            item.combo->setBounds (box.withSizeKeepingCentre (box.getWidth() - 8, 24));
-            i++;
+            auto box = toggleArea.removeFromTop (toggleRowH).reduced (4);
+            auto toggleBounds = box.removeFromLeft (42);
+
+            toggleMap[i].toggle->setBounds (toggleBounds.withSizeKeepingCentre (38, 22));
+            toggleMap[i].label->setBounds (box);
+        }
+
+        // Space between sections
+        area.removeFromTop (16);
+
+        // Six primary combos: three rows of two
+        const int comboGap = 8;
+        const int comboCellW = (area.getWidth() - comboGap) / 2;
+        const int comboRowH = 38;
+
+        for (int i = 0; i < 6; ++i)
+        {
+            int row = i / 2;
+            int col = i % 2;
+
+            auto box = juce::Rectangle<int> (col * (comboCellW + comboGap), area.getY() + row * comboRowH, comboCellW, comboRowH).reduced (2);
+            auto labelArea = box.removeFromLeft (95);
+
+            comboMap[i].label->setBounds (labelArea);
+            comboMap[i].combo->setBounds (box);
+        }
+
+        // Remaining combos: full-width rows
+        int remainingY = area.getY() + comboRowH * 3 + 16;
+        const int remainingRowH = 36;
+
+        for (int i = 6; i < comboMap.size(); ++i)
+        {
+            const int rowWidth = 480;
+
+            auto box = juce::Rectangle<int> (area.getX() + (area.getWidth() - rowWidth) / 2, remainingY, rowWidth, remainingRowH).reduced (3);
+            auto labelArea = box.removeFromLeft (150);
+
+            comboMap[i].label->setBounds (labelArea);
+            comboMap[i].combo->setBounds (box);
+
+            remainingY += remainingRowH;
         }
     }
 
 private:
     struct SliderItem { juce::Slider* slider; juce::Label* label; juce::String id; };
     struct ComboItem { juce::ComboBox* combo; juce::Label* label; juce::String id; };
+    struct ToggleItem { juce::ToggleButton* toggle; juce::Label* label; juce::String id; };
     std::vector<SliderItem> sliderMap;
     std::vector<ComboItem> comboMap;
+    std::vector<ToggleItem> toggleMap;
     juce::OwnedArray<juce::Slider> sliders;
     juce::OwnedArray<juce::ComboBox> combos;
+    juce::OwnedArray<juce::ToggleButton> toggleButtons;
     juce::OwnedArray<juce::Label> labels;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachments;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboAttachments;
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
 };
 
 
@@ -808,7 +882,16 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     advancedPatchCommonButton.setButtonText ("ADVANCED");
     advancedPatchCommonButton.onClick = [this] {
         auto* comp = new AdvancedPatchCommonComponent (audioProcessor, customLookAndFeel);
-        juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component>(comp), advancedPatchCommonButton.getScreenBounds(), nullptr);
+        auto buttonBounds = advancedPatchCommonButton.getScreenBounds();
+        auto& callout = juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component> (comp), buttonBounds, nullptr);
+        auto calloutBounds = callout.getBounds();
+        calloutBounds.translate (260, 0);
+        auto* display = juce::Desktop::getInstance().getDisplays().getDisplayForRect (buttonBounds);
+        
+        if (display != nullptr)
+            calloutBounds = calloutBounds.constrainedWithin (display->userBounds.toNearestInt());
+        
+        callout.setBounds (calloutBounds);
     };
 
     styleButton (advancedEffectsButton, juce::Colour (0xff333333));
