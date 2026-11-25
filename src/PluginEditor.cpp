@@ -810,12 +810,12 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         };
 
         // --- OSCILLATOR 1 ---
-        addComboBox     (prefix + "osc1_wave", "WAVE", { "Saw", "Square", "PW-Sqr", "Tri", "Sine", "Noise", "Feedbk", "SuperSaw", "Ext" });
+        addComboBox     (prefix + "osc1_wave", "WAVE", { "Saw", "Square", "Pulse", "Triangle", "Sine", "Noise", "Feedback", "SuperSaw", "External" });
         addToggleButton (prefix + "osc1_pitch_wide", "WIDE");
         addRotarySlider (prefix + "osc1_pitch", "PITCH");
         addRotarySlider (prefix + "osc1_fine_tune", "DETUNE");
-        addRotarySlider (prefix + "osc1_pulse_width", "PW/FEEDBK");
-        addRotarySlider (prefix + "osc1_pitch_env_depth", "P.ENV");
+        addRotarySlider (prefix + "osc1_pulse_width", "PW/FEEDBACK");
+        addRotarySlider (prefix + "osc1_pitch_env_depth", "PITCH ENV");
 
         // Hook Osc 1 WIDE button to dynamically update pitch slider range
         {
@@ -829,12 +829,12 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         }
 
         // --- OSCILLATOR 2 ---
-        addComboBox     (prefix + "osc2_wave", "WAVE", { "Saw", "Square", "PW-Sqr", "Tri", "Sine", "Noise", "Feedbk", "SuperSaw", "Ext" });
+        addComboBox     (prefix + "osc2_wave", "WAVE", { "Saw", "Square", "Pulse", "Triangle", "Sine", "Noise", "Feedback", "SuperSaw", "External" });
         addToggleButton (prefix + "osc2_pitch_wide", "WIDE");
         addRotarySlider (prefix + "osc2_pitch", "PITCH");
         addRotarySlider (prefix + "osc2_detune", "DETUNE");
-        addRotarySlider (prefix + "osc2_pulse_width", "PW/FEEDBK");
-        addRotarySlider (prefix + "osc2_pitch_env_depth", "P.ENV");
+        addRotarySlider (prefix + "osc2_pulse_width", "PW/FEEDBACK");
+        addRotarySlider (prefix + "osc2_pitch_env_depth", "PITCH ENV");
 
         // Hook Osc 2 WIDE button to dynamically update pitch slider range
         {
@@ -848,21 +848,21 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         }
 
         // --- MIX / MOD ---
-        addComboBox     (prefix + "mix_mod_type", "TYPE", { "MIX", "SYNC", "RING" });
+        addComboBox     (prefix + "mix_mod_type", "TYPE", { "Mix", "Sync", "Ring" });
         addRotarySlider (prefix + "mix_mod_balance", "OSC BAL");
-        addComboBox     (prefix + "mix_mod_low_freq", "LOW FREQ", { "FLAT", "BOOST", "CUT" });
+        addComboBox     (prefix + "mix_mod_low_freq", "LOW FREQ", { "Flat", "Boost", "Cut" });
 
         // --- PITCH ENVELOPE ---
         addLinearSlider (prefix + "pitch_env_attack", "ATTACK");
         addLinearSlider (prefix + "pitch_env_decay", "DECAY");
 
         // --- FILTER ---
-        addComboBox     (prefix + "filter_type", "TYPE", { "BYPASS", "LPF", "HPF", "BPF" });
+        addComboBox     (prefix + "filter_type", "TYPE", { "Bypass", "LPF", "HPF", "BPF" });
         addComboBox     (prefix + "filter_slope", "SLOPE", { "-12dB", "-24dB" });
         addRotarySlider (prefix + "filter_cutoff", "CUTOFF");
-        addRotarySlider (prefix + "filter_resonance", "RESO");
-        addRotarySlider (prefix + "filter_keyfollow", "KEYFLW");
-        addRotarySlider (prefix + "filter_velocity_sens", "VEL.SNS");
+        addRotarySlider (prefix + "filter_resonance", "RESONANCE");
+        addRotarySlider (prefix + "filter_keyfollow", "KEY FOLLOW");
+        addRotarySlider (prefix + "filter_velocity_sens", "VELO SENS");
 
         // --- FILTER ENVELOPE ---
         addLinearSlider (prefix + "filter_attack", "A");
@@ -874,7 +874,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         // --- AMPLIFIER & OVERDRIVE ---
         addRotarySlider (prefix + "amp_level", "LEVEL");
         addRotarySlider (prefix + "amp_pan", "PAN");
-        addRotarySlider (prefix + "amp_velocity_sens", "VEL.SNS");
+        addRotarySlider (prefix + "amp_velocity_sens", "VELO SENS");
         addToggleButton (prefix + "amp_overdrive_switch", "OVERDRIVE");
         addRotarySlider (prefix + "overdrive_level", "DRIVE");
 
@@ -885,27 +885,27 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
         addLinearSlider (prefix + "amp_release", "R");
 
         // --- LFO 1 ---
-        addComboBox     (prefix + "lfo1_shape", "SHAPE", { "TRI", "SIN", "SAW", "SQR", "TRP", "S&H", "RND" });
+        addComboBox     (prefix + "lfo1_shape", "SHAPE", { "Triangle", "Sine", "Saw", "Square", "Triangle-Pulse", "Sample & Hold", "Random" });
         addRotarySlider (prefix + "lfo1_rate", "RATE");
         addComboBox     (prefix + "lfo1_tempo_note", "NOTE", { "16", "12", "8", "4", "2", "1", "3/4", "2/3", "1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "3/32", "1/12", "1/16", "1/24", "1/32" });
         addToggleButton (prefix + "lfo1_tempo_sync", "SYNC");
         addToggleButton (prefix + "lfo1_key_trigger", "KEYTRIG");
         addRotarySlider (prefix + "lfo1_depth", "DEPTH 1");
-        addComboBox     (prefix + "lfo1_dest1", "DEST 1", { "PITCH1", "PW1", "FILTER", "A-FILT" });
+        addComboBox     (prefix + "lfo1_dest1", "DEST 1", { "Osc 1 Pitch", "Osc 1 Pulse Width", "Filter Cutoff", "Audio Filter Cutoff" });
         addRotarySlider (prefix + "lfo1_depth2", "DEPTH 2");
-        addComboBox     (prefix + "lfo1_dest2", "DEST 2", { "PITCH2", "PW2", "AMP" });
+        addComboBox     (prefix + "lfo1_dest2", "DEST 2", { "Osc 2 Pitch", "Osc 2 Pulse Width", "Amp Level" });
         addLinearSlider (prefix + "lfo1_fade_time", "FADE");
 
         // --- LFO 2 ---
-        addComboBox     (prefix + "lfo2_shape", "SHAPE", { "TRI", "SIN", "SAW", "SQR", "TRP", "S&H", "RND" });
+        addComboBox     (prefix + "lfo2_shape", "SHAPE", { "Triangle", "Sine", "Saw", "Square", "Triangle-Pulse", "Sample & Hold", "Random" });
         addRotarySlider (prefix + "lfo2_rate", "RATE");
         addComboBox     (prefix + "lfo2_tempo_note", "NOTE", { "16", "12", "8", "4", "2", "1", "3/4", "2/3", "1/2", "3/8", "1/3", "1/4", "3/16", "1/6", "1/8", "3/32", "1/12", "1/16", "1/24", "1/32" });
         addToggleButton (prefix + "lfo2_tempo_sync", "SYNC");
         addToggleButton (prefix + "lfo2_key_trigger", "KEYTRIG");
         addRotarySlider (prefix + "lfo2_depth", "DEPTH 1");
-        addComboBox     (prefix + "lfo2_dest1", "DEST 1", { "PITCH1", "PW1", "FILTER", "A-FILT" });
+        addComboBox     (prefix + "lfo2_dest1", "DEST 1", { "Osc 1 Pitch", "Osc 1 Pulse Width", "Filter Cutoff", "Audio Filter Cutoff" });
         addRotarySlider (prefix + "lfo2_depth2", "DEPTH 2");
-        addComboBox     (prefix + "lfo2_dest2", "DEST 2", { "PITCH2", "PW2", "AMP" });
+        addComboBox     (prefix + "lfo2_dest2", "DEST 2", { "Osc 2 Pitch", "Osc 2 Pulse Width", "Amp Level" });
         addLinearSlider (prefix + "lfo2_fade_time", "FADE");
     };
 
@@ -913,14 +913,14 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     addToneControls ("lower_");
 
     // --- STATIC COMMON / MASTER PARAMETERS ---
-    addComboBox     ("common_keyboard_mode", "KEY MODE", { "SINGLE", "DUAL", "SPLIT" });
+    addComboBox     ("common_keyboard_mode", "KEY MODE", { "Single", "Dual", "Split" });
     addRotarySlider ("common_tone_balance", "TONE BAL");
-    addRotarySlider ("common_split_point", "SPLIT PT");
+    addRotarySlider ("common_split_point", "SPLIT POINT");
 
-    addComboBox     ("common_mono_solo_select", "VOICE", { "POLY", "SOLO+L", "SOLO" });
+    addComboBox     ("common_mono_solo_select", "VOICE", { "Poly", "Legato", "Solo" });
     addComboBox     ("common_portamento_switch", "PORTA", { "OFF", "ON" });
     addRotarySlider ("common_portamento_time", "TIME");
-    addRotarySlider ("common_pitch_bend_range", "BEND");
+    addRotarySlider ("common_pitch_bend_range", "BENDER");
     addRotarySlider ("common_octave_shift", "OCTAVE");
 
     styleButton (advancedPatchCommonButton, juce::Colour (0xff333333));
@@ -978,7 +978,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
 
     // --- STEREO MODE (SH-201 EDITOR) ---
     addRotarySlider ("common_stereo_width", "WIDTH");
-    addComboBox     ("common_stereo_link_mode", "PARAM LINK", { "LINK ALL", "EXCLUDE OSC" });
+    addComboBox     ("common_stereo_link_mode", "PARAMETER LINK", { "Link All", "Exclude Osc" });
 
     styleButton (stereoModeButton, juce::Colour (0xff4a525e));
     stereoModeButton.setButtonText ("STEREO MODE");
@@ -1539,7 +1539,7 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
     drawSectionFrame (g, { 15,  60,  270, 150 }, "PATCH COMMON", darkBg, darkText, darkBorder);
     drawSectionFrame (g, { 300, 60,  360, 150 }, "VOICE & PERFORM", darkBg, darkText, darkBorder);
     drawSectionFrame (g, { 675, 60,  270, 150 }, "MASTER EFFECTS", darkBg, darkText, darkBorder);
-    drawSectionFrame (g, { 960, 60,  305, 150 }, "STEREO MODE (VST)", darkBg, darkText, darkBorder);
+    drawSectionFrame (g, { 960, 60,  305, 150 }, "STEREO MODE (VST/AU)", darkBg, darkText, darkBorder);
 
     // --- TONE PAGE TOGGLE BAR ---
     g.setColour (juce::Colour (0xff2e333d));
