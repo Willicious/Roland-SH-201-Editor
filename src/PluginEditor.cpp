@@ -1003,6 +1003,11 @@ juce::Colour SH201AudioProcessorEditor::toneColour() const
 
 SH201AudioProcessorEditor::~SH201AudioProcessorEditor()
 {
+    if (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone && getWidth() > 0 && getHeight() > 0)
+    {
+        GlobalSettings::setGuiSize (getWidth(), getHeight());
+    }
+    
     stopTimer();
 }
 
@@ -2114,11 +2119,13 @@ void SH201AudioProcessorEditor::resized()
             child->setTransform (juce::AffineTransform::scale (scale));
         }
     }
-
+    
     if (editorIsReady && getWidth() > 0 && getHeight() > 0)
     {
         // Only save if the user is actively resizing via mouse, to prevent the DAW from corrupting the save on deletion/unmap
-        if (juce::ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
+        if (juce::ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown()
+            // Or, if the app is in Standalone mode
+            || audioProcessor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
         {
             GlobalSettings::setGuiSize (getWidth(), getHeight());
         }
