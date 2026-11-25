@@ -44,39 +44,61 @@ public:
             
             l->setText (name, juce::dontSendNotification);
             l->setColour (juce::Label::textColourId, juce::Colours::white);
-            l->setJustificationType (juce::Justification::centred);
+            l->setJustificationType (juce::Justification::centredRight);
             l->setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
             addAndMakeVisible (l);
             
             comboAttachments.add (new juce::AudioProcessorValueTreeState::ComboBoxAttachment (p.getAPVTS(), paramId, *c));
             comboMap.push_back ({ c, l, paramId });
         };
+        
+        auto setupToggle = [this, &p, &lf] (const juce::String& paramId, const juce::String& name)
+        {
+            auto* t = toggleButtons.add (new juce::ToggleButton());
+            auto* l = labels.add (new juce::Label());
 
-        setupSlider ("patch_program_number", "Prog Num");
-        setupSlider ("patch_rx_tx_channel", "Rx/Tx Ch");
-        setupCombo  ("patch_remain", "Remain", { "OFF", "ON" });
+            t->setButtonText ({});
+            t->setClickingTogglesState (true);
+            t->setLookAndFeel (&lf);
+            addAndMakeVisible (t);
+
+            l->setText (name, juce::dontSendNotification);
+            l->setColour (juce::Label::textColourId, juce::Colours::white);
+            l->setJustificationType (juce::Justification::centredLeft);
+            l->setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
+            addAndMakeVisible (l);
+
+            toggleAttachments.add (new juce::AudioProcessorValueTreeState::ButtonAttachment (p.getAPVTS(), paramId, *t));
+            toggleMap.push_back ({ t, l, paramId });
+        };
+
+        setupSlider ("patch_program_number", "Prog Number");
+        setupSlider ("patch_rx_tx_channel", "IN/OUT Channel");
         setupSlider ("master_tune", "Master Tune");
         setupSlider ("master_key_shift", "Key Shift");
         setupSlider ("master_level", "Master Level");
-        setupCombo  ("system_clock_source", "Clk Src", { "PATCH", "SYSTEM", "MIDI", "USB" });
         setupSlider ("system_tempo", "Tempo");
-        setupCombo  ("receive_program_change", "Rx PC", { "OFF", "ON" });
-        setupCombo  ("receive_bank_select", "Rx Bank", { "OFF", "ON" });
-        setupCombo  ("transmit_edit_data", "Tx Edit", { "OFF", "ON" });
-        setupCombo  ("soft_through", "Soft Thru", { "OFF", "ON" });
-        setupCombo  ("midi_usb_thru", "USB Thru", { "OFF", "ON" });
-        setupCombo  ("transmit_program_change", "Tx PC", { "OFF", "ON" });
-        setupCombo  ("transmit_bank_select", "Tx Bank", { "OFF", "ON" });
-        setupCombo  ("transmit_active_sensing", "Tx ActSens", { "OFF", "ON" });
         setupSlider ("transpose_value", "Transpose");
-        setupCombo  ("local_switch", "Local Sw", { "OFF", "ON" });
-        setupCombo  ("remote_keyboard_switch", "Rem KBD", { "OFF", "ON" });
-        setupCombo  ("pedal_polarity", "Pedal Pol", { "STD", "REV" });
-        setupCombo  ("pedal_assign", "Pedal Asgn", { "HOLD", "MOD", "VOL", "BAL", "PAN", "EXP", "START", "ARP" });
-        setupSlider ("d_beam_sens", "DBeam Sens");
-        setupCombo  ("recorder_sync_output", "Rec Sync", { "OFF", "ON" });
-        setupCombo  ("recorder_metronome_mode", "Metro Mode", { "OFF", "REC", "REC&PLY", "ALW" });
-        setupSlider ("recorder_metronome_level", "Metro Lvl");
+        setupSlider ("d_beam_sens", "D-Beam Sensitivity");
+        setupSlider ("recorder_metronome_level", "Metronome Level");
+        
+        setupToggle ("patch_remain", "Patch Remain");
+        setupToggle ("receive_program_change", "Prog Change IN");
+        setupToggle ("receive_bank_select", "Bank Select IN");
+        setupToggle ("transmit_edit_data", "Edit Data OUT");
+        setupToggle ("soft_through", "Soft Thru");
+        setupToggle ("midi_usb_thru", "USB Thru");
+        setupToggle ("transmit_program_change", "Prog Change OUT");
+        setupToggle ("transmit_bank_select", "Bank Select OUT");
+        setupToggle ("transmit_active_sensing", "Active Sensing OUT");
+        setupToggle ("local_switch", "Local Switch");
+        setupToggle ("remote_keyboard_switch", "Remote KBD");
+        setupToggle ("recorder_sync_output", "Recorder Sync");
+        
+        setupCombo  ("system_clock_source", "Clock Source", { "Patch", "System", "MIDI", "USB" });
+        setupCombo  ("pedal_polarity", "Pedal Polarity", { "Standard", "Reverse" });
+        setupCombo  ("pedal_assign", "Pedal Assign", { "Hold", "Mod", "Volume", "Balance", "Pan", "Expression", "Start", "Arpeggiator" });
+        setupCombo  ("recorder_metronome_mode", "Metronome Mode", { "Off", "Record Only", "Record & Play", "Always On" });
 
         // --- Standalone Plugin Configuration Controls ---
         int currentW = editor.getWidth();
@@ -160,7 +182,7 @@ public:
         populateMidiDeviceCombos (p);
         updateDinMidiVisibility (currentEditorMode == 2);
 
-        setSize (680, 440);
+        setSize (800, 440);
     }
 
     void paint (juce::Graphics& g) override
@@ -176,27 +198,47 @@ public:
 
     void resized() override
     {
-        int cols = 7;
-        int cellW = getWidth() / cols;
-        int cellH = 350 / 4; // Top 4 rows for synth parameters
+        int sliderCols = 9;
+        int sliderCellW = getWidth() / sliderCols;
+        int sliderCellH = 110;
         
+        int toggleRowH = 60;
+        int toggleColW = (getWidth() * 70) / 100 / 3;
+        
+        int comboRowH = 60;
+        int comboColW = getWidth() - (toggleColW * 3);
+        
+        // Top section: sliders
         int i = 0;
         for (auto& item : sliderMap)
         {
-            int r = i / cols;
-            int c = i % cols;
-            auto box = juce::Rectangle<int> (c * cellW, r * cellH, cellW, cellH).reduced (4);
+            auto box = juce::Rectangle<int> (i * sliderCellW, 0, sliderCellW, sliderCellH).reduced (4);
             item.label->setBounds (box.removeFromTop (18));
             item.slider->setBounds (box.withSizeKeepingCentre (54, 66));
             i++;
         }
+        
+        // Top section: toggle buttons
+        i = 0;
+        for (auto& item : toggleMap)
+        {
+            int c = i / 4;
+            int r = i % 4;
+            auto box = juce::Rectangle<int> (c * toggleColW, 115 + r * toggleRowH, toggleColW, toggleRowH).reduced (4);
+            auto toggleArea = box.removeFromLeft (42);
+            item.toggle->setBounds (toggleArea.withSizeKeepingCentre (38, 22));
+            item.label->setBounds (box);
+            i++;
+        }
+
+        // Top section: combos
+        i = 0;
         for (auto& item : comboMap)
         {
-            int r = i / cols;
-            int c = i % cols;
-            auto box = juce::Rectangle<int> (c * cellW, r * cellH, cellW, cellH).reduced (4);
-            item.label->setBounds (box.removeFromTop (18));
-            item.combo->setBounds (box.withSizeKeepingCentre (box.getWidth() - 8, 24));
+            auto box = juce::Rectangle<int> (3 * toggleColW, 115 + i * comboRowH, comboColW, comboRowH).reduced (4);
+            auto labelArea = box.removeFromLeft (105);
+            item.label->setBounds (labelArea);
+            item.combo->setBounds (box.withSizeKeepingCentre (box.getWidth(), 26));
             i++;
         }
 
@@ -294,13 +336,17 @@ private:
 
     struct SliderItem { juce::Slider* slider; juce::Label* label; juce::String id; };
     struct ComboItem { juce::ComboBox* combo; juce::Label* label; juce::String id; };
+    struct ToggleItem { juce::ToggleButton* toggle; juce::Label* label; juce::String id; };
     std::vector<SliderItem> sliderMap;
     std::vector<ComboItem> comboMap;
+    std::vector<ToggleItem> toggleMap;
     juce::OwnedArray<juce::Slider> sliders;
     juce::OwnedArray<juce::ComboBox> combos;
+    juce::OwnedArray<juce::ToggleButton> toggleButtons;
     juce::OwnedArray<juce::Label> labels;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttachments;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboAttachments;
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
 
     juce::Label guiSizeLabel;
     juce::ComboBox guiSizeCombo;
@@ -581,7 +627,16 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     globalSettingsButton.setButtonText ("GLOBAL");
     globalSettingsButton.onClick = [this] {
         auto* comp = new GlobalSettingsComponent (*this, audioProcessor, customLookAndFeel);
-        juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component>(comp), globalSettingsButton.getScreenBounds(), nullptr);
+        auto buttonBounds = globalSettingsButton.getScreenBounds();
+        auto& callout = juce::CallOutBox::launchAsynchronously (std::unique_ptr<juce::Component> (comp), buttonBounds, nullptr);
+        auto calloutBounds = callout.getBounds();
+        calloutBounds.translate (-200, 0);
+        auto* display = juce::Desktop::getInstance().getDisplays().getDisplayForRect (buttonBounds);
+        
+        if (display != nullptr)
+            calloutBounds = calloutBounds.constrainedWithin (display->userBounds.toNearestInt());
+        
+        callout.setBounds (calloutBounds);
     };
 
     styleButton (patchBrowserButton, juce::Colour (0xff3d5a80));

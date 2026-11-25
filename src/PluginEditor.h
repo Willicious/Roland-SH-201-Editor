@@ -183,6 +183,34 @@ public:
             g.fillEllipse (juce::Rectangle<float> (static_cast<float> (thumbWidth), static_cast<float> (thumbWidth)).withCentre ({startPoint.x, sliderPos}));
         }
     }
+    
+    void drawToggleButton (juce::Graphics& g, juce::ToggleButton& button, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    {
+        auto bounds = button.getLocalBounds().toFloat().reduced (2.0f);
+
+        const float switchWidth = 36.0f;
+        const float switchHeight = 18.0f;
+
+        auto switchBounds = bounds.withSizeKeepingCentre (switchWidth, switchHeight);
+
+        bool isOn = button.getToggleState();
+
+        // Switch background
+        g.setColour (isOn ? juce::Colour (0xff00aaf5)
+                          : juce::Colour (0xff555555));
+
+        g.fillRoundedRectangle (switchBounds, switchHeight * 0.5f);
+
+        // Switch indicator
+        const float clickSize = switchHeight - 4.0f;
+        auto clickBounds = juce::Rectangle<float> (clickSize, clickSize);
+        clickBounds.setCentre (isOn
+            ? juce::Point<float> (switchBounds.getRight() - clickSize * 0.5f - 1.0f, switchBounds.getCentreY())
+            : juce::Point<float> (switchBounds.getX() + clickSize * 0.5f + 1.0f, switchBounds.getCentreY()));
+        
+        g.setColour (juce::Colours::white);
+        g.fillEllipse (clickBounds);
+    }
 
 private:
     juce::Image knobStrip;
