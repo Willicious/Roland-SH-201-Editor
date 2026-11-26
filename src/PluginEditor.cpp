@@ -1176,6 +1176,28 @@ void SH201AudioProcessorEditor::updatePageButtons()
     lowerPageButton.setColour (juce::TextButton::buttonColourId, isUpper ? inactiveColour : activeColour);
 }
 
+void SH201AudioProcessorEditor::updateUIForPatchBrowser(bool isBrowser)
+{
+    if (isBrowser)
+    {
+        statusLabel.setBounds       (500,  8, 400, 22);
+        lastReceivedLabel.setBounds (500, 30, 400, 22);
+        
+        globalSettingsButton.setBounds ( 915, 8, 110, 34);
+        pullPatchButton.setBounds      (1035, 8, 110, 34);
+        reconnectButton.setBounds      (1155, 8, 110, 34);
+    }
+    else
+    {
+        statusLabel.setBounds       (870,  8, 400, 22);
+        lastReceivedLabel.setBounds (870, 30, 400, 22);
+        
+        globalSettingsButton.setBounds ( 915, 233, 110, 34);
+        pullPatchButton.setBounds      (1035, 233, 110, 34);
+        reconnectButton.setBounds      (1155, 233, 110, 34);
+    }
+}
+
 void SH201AudioProcessorEditor::updateViewModeVisibility()
 {
     bool isBrowser = (currentViewMode == ViewMode::Browser);
@@ -1189,6 +1211,8 @@ void SH201AudioProcessorEditor::updateViewModeVisibility()
             patchBrowser->toFront (true);
         }
     }
+    
+    updateUIForPatchBrowser(isBrowser);
 
     upperPageButton.setVisible (! isBrowser);
     lowerPageButton.setVisible (! isBrowser);
@@ -1665,22 +1689,17 @@ void SH201AudioProcessorEditor::resized()
     // --- Header Layout ---
     logoLabel.setBounds         (15,   8, 340, 48);
     versionLabel.setBounds      (340, 30, 400, 22);
-    statusLabel.setBounds       (870,  8, 400, 22);
-    lastReceivedLabel.setBounds (870, 30, 400, 22);
 
     if (patchBrowser)
         patchBrowser->setBounds (15, 55, 1280 - 30, 920 - 85);
-
-    // --- Footer Layout ---
 
     // --- Button Layout ---
     patchBrowserButton.setBounds   (  15, 233, 160, 34);
     initPatchButton.setBounds      ( 185, 233, 140, 34);
     upperPageButton.setBounds      ( 360, 233, 255, 34);
     lowerPageButton.setBounds      ( 625, 233, 255, 34);
-    globalSettingsButton.setBounds ( 915, 233, 110, 34);
-    pullPatchButton.setBounds      (1035, 233, 110, 34);
-    reconnectButton.setBounds      (1155, 233, 110, 34);
+    
+    updateUIForPatchBrowser(currentViewMode == ViewMode::Browser);
 
     // Helper: find a slider or combo by paramId and set its bounds within a cell.
     // Also finds and positions the associated label above the control.

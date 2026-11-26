@@ -277,6 +277,7 @@ private:
     std::unique_ptr<PatchBrowserComponent> patchBrowser;
 
     void updatePageButtons();
+    void updateUIForPatchBrowser(bool isBrowser);
     void updateTonePageVisibility();
     void updateViewModeVisibility();
 
