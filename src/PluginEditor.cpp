@@ -951,7 +951,7 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     logoLabel.setJustificationType (juce::Justification::centredLeft);
     addAndMakeVisible (logoLabel);
 
-    versionLabel.setText ("Version 1.2.2", juce::dontSendNotification);
+    versionLabel.setText ("Version 1.2.3", juce::dontSendNotification);
     versionLabel.setFont (juce::Font (juce::FontOptions ("Segoe UI", 11.0f, juce::Font::bold)));
     versionLabel.setColour (juce::Label::textColourId, juce::Colour (0xff8a93a0));
     versionLabel.setJustificationType (juce::Justification::centredLeft);
