@@ -552,10 +552,10 @@ private:
 };
 
 
-class AdvancedEffectsComponent : public juce::Component
+class AdvancedEffectsComponent : public juce::Component, private juce::AudioProcessorValueTreeState::Listener, private juce::AsyncUpdater
 {
 public:
-    AdvancedEffectsComponent (SH201AudioProcessor& p, SH201LookAndFeel& lf)
+    AdvancedEffectsComponent (SH201AudioProcessor& p, SH201LookAndFeel& lf) : processor (p)
     {
         auto setupSlider = [this, &p, &lf] (const juce::String& paramId, const juce::String& name)
         {
@@ -607,7 +607,7 @@ public:
         {
             c.setLookAndFeel (&lf);
             c.addItemList (choices, 1);
-            c.setSelectedId (9, juce::dontSendNotification);
+            c.setSelectedId (10, juce::dontSendNotification);
             c.setColour (juce::ComboBox::backgroundColourId, juce::Colour (0xff2e333d));
             c.setColour (juce::ComboBox::textColourId, juce::Colours::white);
             c.setColour (juce::ComboBox::outlineColourId, juce::Colour (0xff555555));
@@ -615,8 +615,50 @@ public:
             addAndMakeVisible (c);
         };
 
-        setupPresetCombo (delayPresetCombo, juce::StringArray ("Delay 1", "Delay 2", "Delay 3", "Delay 4", "Delay 5", "Delay 6", "Delay 7", "Delay 8", "Custom")); // TODO - implement these
-        setupPresetCombo (reverbPresetCombo, juce::StringArray ("Reverb 1", "Reverb 2", "Reverb 3", "Reverb 4", "Reverb 5", "Reverb 6", "Reverb 7", "Reverb 8", "Custom")); // TODO - implement these
+        setupPresetCombo (delayPresetCombo, juce::StringArray ("Simple Delay", "1-Shot Delay", "Medium Delay", "Long Delay", "Space Echo Analog Delay", "Mod Delay", "Juno Chorus 1", "Juno Chorus 2", "SH-201 Default", "Custom"));
+        delayPresetCombo.onChange = [this]
+        {
+            const int presetIndex = delayPresetCombo.getSelectedId() - 1;
+
+            if (presetIndex >= 0 && presetIndex < delayPresets.size())
+                applyDelayPreset (presetIndex);
+        };
+        
+        setupPresetCombo (reverbPresetCombo, juce::StringArray ("Room 1", "Room 2", "Studio 1", "Studio 2", "Hall 1", "Hall 2", "Plate 1", "Plate 2", "SH-201 Default", "Custom"));
+        reverbPresetCombo.onChange = [this]
+        {
+            const int presetIndex = reverbPresetCombo.getSelectedId() - 1;
+
+            if (presetIndex >= 0 && presetIndex < reverbPresets.size())
+                applyReverbPreset (presetIndex);
+        };
+        
+        auto& apvts = processor.getAPVTS();
+
+        const juce::StringArray parameterIDs
+        {
+            "patch_delay_time",
+            "patch_delay_feedback",
+            "patch_delay_hf_damp",
+            "patch_delay_mod_rate",
+            "patch_delay_mod_depth",
+
+            "patch_reverb_pre_delay",
+            "patch_reverb_time",
+            "patch_reverb_size",
+            "patch_reverb_density",
+            "patch_reverb_diffusion",
+            "patch_reverb_lf_damp_freq",
+            "patch_reverb_lf_damp_gain",
+            "patch_reverb_hf_damp_freq",
+            "patch_reverb_hf_damp_gain",
+            "patch_reverb_high_cut"
+        };
+
+        for (const auto& parameterID : parameterIDs)
+            apvts.addParameterListener (parameterID, this);
+        
+        updatePresetSelections();
         
         setupSlider ("patch_delay_time", "Delay Time");
         setupSlider ("patch_delay_feedback", "Delay Feedback");
@@ -693,6 +735,8 @@ private:
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboAttachments;
     juce::ComboBox delayPresetCombo;
     juce::ComboBox reverbPresetCombo;
+    SH201AudioProcessor& processor;
+    
     void positionItem (ControlItem& item, int x, int y, int columnWidth)
     {
         if (item.isSlider)
@@ -701,6 +745,197 @@ private:
             item.control->setBounds (x + (columnWidth - 100) / 2, y + 34, 100, 24);
 
         item.label->setBounds (x + 4, y, columnWidth - 8, 16);
+    }
+    
+    struct DelayPreset
+    {
+        float time;
+        float feedback;
+        int hfDamp;
+        float modRate;
+        float modDepth;
+    };
+
+    struct ReverbPreset
+    {
+        float preDelay;
+        float time;
+        float size;
+        float density;
+        float diffusion;
+        int lfDampFreq;
+        float lfDampGain;
+        int hfDampFreq;
+        float hfDampGain;
+        int highCut;
+    };
+    
+    const std::array<DelayPreset, 9> delayPresets
+    {
+        { // time, feedback, hfdamp, modRate, modDepth
+            {  60,       64,     17,       0,        0 }, // 1 - Simple delay
+            {  60,       49,     17,       2,       10 }, // 2 - 1-Shot Delay
+            {  66,       63,     17,       2,        3 }, // 3 - Medium
+            {  75,       63,     16,       3,        3 }, // 4 - Long
+            {  60,       73,     10,       2,       23 }, // 5 - Analog
+            {  60,       64,     17,       8,       24 }, // 6 - Mod Delay
+            {   0,       49,     15,       2,       14 }, // 7 - Juno Chorus 1
+            {   0,       53,     15,       2,       65 }, // 8 - Juno Chorus 2
+            {  64,       59,     17,       5,       10 }  // SH-201 Default
+        }
+    };
+
+    const std::array<ReverbPreset, 9> reverbPresets
+    {
+        { // pre-del, time, size, density, diffusion, lfDmpFq, lfDmpGain, hfDmpFq, hfDmpGain, highCut
+            {      0,   50,    0,      48,       127,      19,        36,       0,         6,      13 }, // 1 - Room 1
+            {      0,   50,    1,     100,        60,      19,        36,       0,        18,      20 }, // 2 - Room 2
+            {     40,   55,    2,      48,       127,      19,        36,       0,         6,      16 }, // 3 - Studio 1
+            {     53,   52,    3,     100,       127,      19,        36,       0,        18,      20 }, // 4 - Studio 2
+            {    110,   80,    6,      70,       127,      19,        36,       0,         6,      16 }, // 5 - Hall 1
+            {    125,   80,    7,     127,       127,      19,        36,       0,        26,      20 }, // 6 - Hall 2
+            {      0,   64,    4,     127,       127,      19,        36,       0,        36,      16 }, // 7 - Plate 1
+            {      0,   64,    5,     120,       127,      19,        36,       5,        23,      20 }, // 8 - Plate 2
+            {     10,   64,    7,     127,       127,      19,        36,       0,        36,      19 }  // SH-201 Default
+        }
+    };
+    
+    void setParameterValue (const juce::String& paramId, float value)
+    {
+        if (auto* param = processor.getAPVTS().getParameter (paramId))
+        {
+            const float normalisedValue = param->convertTo0to1 (value);
+            param->setValueNotifyingHost (normalisedValue);
+        }
+    }
+    
+    void applyDelayPreset (int presetIndex)
+    {
+        if (presetIndex < 0 || presetIndex >= delayPresets.size())
+            return;
+
+        const auto& preset = delayPresets[presetIndex];
+
+        setParameterValue ("patch_delay_time", preset.time);
+        setParameterValue ("patch_delay_feedback", preset.feedback);
+        setParameterValue ("patch_delay_hf_damp", (float) preset.hfDamp);
+        setParameterValue ("patch_delay_mod_rate", preset.modRate);
+        setParameterValue ("patch_delay_mod_depth", preset.modDepth);
+    }
+    
+    void applyReverbPreset (int presetIndex)
+    {
+        if (presetIndex < 0 || presetIndex >= reverbPresets.size())
+            return;
+
+        const auto& preset = reverbPresets[presetIndex];
+
+        setParameterValue ("patch_reverb_pre_delay", preset.preDelay);
+        setParameterValue ("patch_reverb_time", preset.time);
+        setParameterValue ("patch_reverb_size", preset.size);
+        setParameterValue ("patch_reverb_density", preset.density);
+        setParameterValue ("patch_reverb_diffusion", preset.diffusion);
+        setParameterValue ("patch_reverb_lf_damp_freq", (float) preset.lfDampFreq);
+        setParameterValue ("patch_reverb_lf_damp_gain", preset.lfDampGain);
+        setParameterValue ("patch_reverb_hf_damp_freq", (float) preset.hfDampFreq);
+        setParameterValue ("patch_reverb_hf_damp_gain", preset.hfDampGain);
+        setParameterValue ("patch_reverb_high_cut", (float) preset.highCut);
+    }
+    
+    bool parameterMatches (const juce::String& parameterID, float expectedValue) const
+    {
+        auto* param = processor.getAPVTS().getParameter (parameterID);
+
+        if (param == nullptr)
+            return false;
+
+        const float actualValue = param->convertFrom0to1 (param->getValue());
+
+        return std::abs (actualValue - expectedValue) < 0.001f;
+    }
+    
+    void updatePresetSelections()
+    {
+        int delayPresetID = 10;  // Custom
+        int reverbPresetID = 10; // Custom
+
+        for (int i = 0; i < delayPresets.size(); ++i)
+        {
+            const auto& preset = delayPresets[i];
+
+            if (parameterMatches ("patch_delay_time", preset.time)
+                && parameterMatches ("patch_delay_feedback", preset.feedback)
+                && parameterMatches ("patch_delay_hf_damp", (float) preset.hfDamp)
+                && parameterMatches ("patch_delay_mod_rate", preset.modRate)
+                && parameterMatches ("patch_delay_mod_depth", preset.modDepth))
+            {
+                delayPresetID = i + 1;
+                break;
+            }
+        }
+
+        for (int i = 0; i < reverbPresets.size(); ++i)
+        {
+            const auto& preset = reverbPresets[i];
+
+            if (parameterMatches ("patch_reverb_pre_delay", preset.preDelay)
+                && parameterMatches ("patch_reverb_time", preset.time)
+                && parameterMatches ("patch_reverb_size", preset.size)
+                && parameterMatches ("patch_reverb_density", preset.density)
+                && parameterMatches ("patch_reverb_diffusion", preset.diffusion)
+                && parameterMatches ("patch_reverb_lf_damp_freq", (float) preset.lfDampFreq)
+                && parameterMatches ("patch_reverb_lf_damp_gain", preset.lfDampGain)
+                && parameterMatches ("patch_reverb_hf_damp_freq", (float) preset.hfDampFreq)
+                && parameterMatches ("patch_reverb_hf_damp_gain", preset.hfDampGain)
+                && parameterMatches ("patch_reverb_high_cut", (float) preset.highCut))
+            {
+                reverbPresetID = i + 1;
+                break;
+            }
+        }
+
+        delayPresetCombo.setSelectedId (delayPresetID, juce::dontSendNotification);
+        reverbPresetCombo.setSelectedId (reverbPresetID, juce::dontSendNotification);
+    }
+    
+    void parameterChanged (const juce::String& parameterID, float newValue) override
+    {
+        triggerAsyncUpdate();
+    }
+
+    void handleAsyncUpdate() override
+    {
+        updatePresetSelections();
+    }
+    
+    ~AdvancedEffectsComponent() override
+    {
+        auto& apvts = processor.getAPVTS();
+
+        const juce::StringArray parameterIDs
+        {
+            "patch_delay_time",
+            "patch_delay_feedback",
+            "patch_delay_hf_damp",
+            "patch_delay_mod_rate",
+            "patch_delay_mod_depth",
+
+            "patch_reverb_pre_delay",
+            "patch_reverb_time",
+            "patch_reverb_size",
+            "patch_reverb_density",
+            "patch_reverb_diffusion",
+            "patch_reverb_lf_damp_freq",
+            "patch_reverb_lf_damp_gain",
+            "patch_reverb_hf_damp_freq",
+            "patch_reverb_hf_damp_gain",
+            "patch_reverb_high_cut"
+        };
+
+        for (const auto& parameterID : parameterIDs)
+            apvts.removeParameterListener (parameterID, this);
+
+        cancelPendingUpdate();
     }
 };
 
