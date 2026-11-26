@@ -1266,13 +1266,15 @@ SH201AudioProcessorEditor::SH201AudioProcessorEditor (SH201AudioProcessor& p)
     };
 
     setupLinkButton ("link_osc1");
-    setupLinkButton ("link_osc2");
     setupLinkButton ("link_mix_mod");
+    setupLinkButton ("link_osc2");
     setupLinkButton ("link_pitch_env");
+    
     setupLinkButton ("link_filter");
     setupLinkButton ("link_filter_env");
-    setupLinkButton ("link_amp_env");
     setupLinkButton ("link_amp");
+    setupLinkButton ("link_amp_env");
+    
     setupLinkButton ("link_lfo1");
     setupLinkButton ("link_lfo2");
 
@@ -1831,18 +1833,18 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRoundedRectangle (15.0f, 225.0f, 1250.0f, 50.0f, 6.0f);
 
     // --- DYNAMIC TONE SECTION FRAMES (Swaps between Upper / Lower) ---
-    drawSectionFrame (g, { 15,  290, 390, 190 }, "OSCILLATOR 1", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 420, 290, 390, 190 }, "OSCILLATOR 2", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 825, 290, 240, 190 }, "MIX / MOD", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 1080, 290, 185, 190 }, "PITCH ENV", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, layout.osc1, "OSCILLATOR 1", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, layout.mixMod, "MIX / MOD", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, layout.osc2, "OSCILLATOR 2", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, layout.pitchEnv, "PITCH ENV", darkBg, darkText, darkBorder, true);
 
-    drawSectionFrame (g, { 15,  495, 420, 214 }, "FILTER", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 450, 495, 470, 214 }, "FILTER ENVELOPE", darkBg, darkText, darkBorder, true);
-    drawSectionFrame (g, { 935, 495, 330, 214 }, "AMP ENVELOPE", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, layout.filter, "FILTER", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, layout.filterEnv, "FILTER ENVELOPE", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, layout.amp, "AMP & OVERDRIVE", silverBg, silverText, silverBorder, true);
+    drawSectionFrame (g, layout.ampEnv, "AMP ENVELOPE", darkBg, darkText, darkBorder, true);
 
-    drawSectionFrame (g, { 15,  724, 420, 190 }, "AMP & OVERDRIVE", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 450, 724, 405, 190 }, "LFO 1  ", darkBg, darkText, darkBorder, true);
-    drawSectionFrame (g, { 870, 724, 395, 190 }, "LFO 2  ", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, layout.lfo1, "LFO 1  ", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, layout.lfo2, "LFO 2  ", darkBg, darkText, darkBorder, true);
 
     // Draw visual linking lines for Osc 1 and 2 pitch wide dropdowns
     auto drawPitchLine = [this, &g] (const juce::String& prefix, bool isOsc1)
@@ -2168,6 +2170,7 @@ void SH201AudioProcessorEditor::resized()
         }
     }
 
+    // --- 2. DYNAMIC TONE PAGE SECTION (y = 290..840) ---
     auto placeOscPanels = [this] (juce::Rectangle<int> box, bool isOsc1)
     {
         box.removeFromTop (26); // Decreased from 42 to shift all controls up and prevent bottom overlap
@@ -2178,7 +2181,7 @@ void SH201AudioProcessorEditor::resized()
         int topSectionH = labelH + comboH + 10;
         juce::Rectangle<int> topArea = box.removeFromTop (topSectionH);
         
-        int comboW = 100;
+        int comboW = 120;
         int spacing = 30;
         int totalTopW = comboW * 2 + spacing;
         juce::Rectangle<int> combosBox = topArea.withSizeKeepingCentre (totalTopW, topArea.getHeight());
@@ -2372,6 +2375,7 @@ void SH201AudioProcessorEditor::resized()
 
         int knobSectionH = labelH + knobH;
         juce::Rectangle<int> knobCell = rightArea.withSizeKeepingCentre (knobW, knobSectionH);
+        knobCell.translate (10, 0);
 
         juce::StringArray prefixes = { "upper_", "lower_" };
         for (auto& prefix : prefixes)
@@ -2405,23 +2409,13 @@ void SH201AudioProcessorEditor::resized()
         }
     };
 
-    // --- 2. DYNAMIC TONE PAGE SECTION (y = 290..840) ---
-    placeOscPanels ({ 15,  290, 390, 190 }, true);
-    placeOscPanels ({ 420, 290, 390, 190 }, false);
-    placeMixModPanel ({ 825, 290, 240, 190 });
-    placeToneGrid ({ 1080, 290, 185, 190 }, { "pitch_env_attack", "pitch_env_decay" }, 2, 1);
-
-    placeFilterPanel ({ 15,  495, 420, 214 });
-    placeToneGrid ({ 450, 495, 470, 214 }, { "filter_attack", "filter_decay", "filter_sustain", "filter_release", "filter_env_depth" }, 5, 1);
-    placeToneGrid ({ 935, 495, 330, 214 }, { "amp_attack", "amp_decay", "amp_sustain", "amp_release" }, 4, 1);
-
     auto placeLfoPanel = [this] (juce::Rectangle<int> box, const juce::String& lfoPrefix)
     {
         box.removeFromTop (12);
         box.reduce (8, 0);
 
         int colW = box.getWidth() / 5;
-        int comboW = 86;
+        int comboW = 120;
         int knobW = 68;
         int knobH = 84;
         
@@ -2494,9 +2488,18 @@ void SH201AudioProcessorEditor::resized()
         }
     };
 
-    placeAmpPanel ({ 15,  724, 420, 190 });
-    placeLfoPanel ({ 450, 724, 405, 190 }, "lfo1");
-    placeLfoPanel ({ 870, 724, 395, 190 }, "lfo2");
+    placeOscPanels (layout.osc1, true);
+    placeMixModPanel (layout.mixMod);
+    placeOscPanels (layout.osc2, false);
+    placeToneGrid (layout.pitchEnv, { "pitch_env_attack", "pitch_env_decay" }, 2, 1);
+    
+    placeFilterPanel (layout.filter);
+    placeToneGrid (layout.filterEnv, { "filter_attack", "filter_decay", "filter_sustain", "filter_release", "filter_env_depth" }, 5, 1);
+    placeAmpPanel (layout.amp);
+    placeToneGrid (layout.ampEnv, { "amp_attack", "amp_decay", "amp_sustain", "amp_release" }, 4, 1);
+    
+    placeLfoPanel (layout.lfo1, "lfo1");
+    placeLfoPanel (layout.lfo2, "lfo2");
 
     auto positionLinkButton = [this] (int index, juce::Rectangle<int> bounds)
     {
@@ -2504,22 +2507,22 @@ void SH201AudioProcessorEditor::resized()
         {
             int bw = 42;
             int bh = 18;
-            linkButtons[index]->setBounds (bounds.getX() + bounds.getWidth() - bw - 10, bounds.getY() + 5, bw, bh);
+            linkButtons[index]->setBounds (bounds.getX() + bounds.getWidth() - bw, bounds.getY() + 5, bw, bh);
         }
     };
     
-    positionLinkButton (0, { 25,  290, 390, 190 }); // OSC 1
-    positionLinkButton (1, { 430, 290, 390, 190 }); // OSC 2
-    positionLinkButton (2, { 835, 290, 240, 190 }); // MIX / MOD
-    positionLinkButton (3, { 1090, 290, 185, 190 }); // PITCH ENV
+    positionLinkButton (0, layout.osc1);
+    positionLinkButton (1, layout.mixMod);
+    positionLinkButton (2, layout.osc2);
+    positionLinkButton (3, layout.pitchEnv);
 
-    positionLinkButton (4, { 25,  495, 420, 214 }); // FILTER
-    positionLinkButton (5, { 460, 495, 470, 214 }); // FILTER ENV
-    positionLinkButton (6, { 945, 495, 330, 214 }); // AMP ENV
+    positionLinkButton (4, layout.filter);
+    positionLinkButton (5, layout.filterEnv);
+    positionLinkButton (6, layout.amp);
+    positionLinkButton (7, layout.ampEnv);
 
-    positionLinkButton (7, { 25,  724, 420, 190 }); // AMP & OVERDRIVE
-    positionLinkButton (8, { 460, 724, 405, 190 }); // LFO 1
-    positionLinkButton (9, { 880, 724, 395, 190 }); // LFO 2
+    positionLinkButton (8, layout.lfo1);
+    positionLinkButton (9, layout.lfo2);
 
     float scale = (float) getWidth() / 1280.0f;
     for (auto* child : getChildren())

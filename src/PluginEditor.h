@@ -281,7 +281,6 @@ private:
     void updateTonePageVisibility();
     void updateViewModeVisibility();
 
-
     // Dynamic Parameter GUI storage
     juce::OwnedArray<juce::TextButton> linkButtons;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> linkAttachments;
@@ -320,6 +319,27 @@ private:
                            juce::Colour textColour = juce::Colour (0xff00e5ff),
                            juce::Colour borderColour = juce::Colour (0xff28303d),
                            bool isToneDependent = false);
+    
+    struct Layout
+    {
+        // Row 1
+        juce::Rectangle<int> osc1      {   15, 290, 410, 190 };
+        juce::Rectangle<int> mixMod    {  440, 290, 200, 190 };
+        juce::Rectangle<int> osc2      {  655, 290, 410, 190 };
+        juce::Rectangle<int> pitchEnv  { 1080, 290, 185, 190 };
+
+        // Row 2
+        juce::Rectangle<int> filter    {   15, 495, 380, 214 };
+        juce::Rectangle<int> filterEnv {  410, 495, 250, 214 };
+        juce::Rectangle<int> amp       {  675, 495, 380, 214 };
+        juce::Rectangle<int> ampEnv    { 1070, 495, 195, 214 };
+
+        // Row 3
+        juce::Rectangle<int> lfo1      {   15, 724, 617, 190 };
+        juce::Rectangle<int> lfo2      {  647, 724, 618, 190 };
+    };
+
+    Layout layout;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SH201AudioProcessorEditor)
 };
