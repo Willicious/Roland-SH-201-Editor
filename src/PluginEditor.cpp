@@ -1779,9 +1779,8 @@ void SH201AudioProcessorEditor::drawSectionFrame (juce::Graphics& g, juce::Recta
         g.fillPath (p);
     }
     
-    float thickness = borderColour == juce::Colour (0xffe2e5e8) ? 1.5f : 3.0f;
     g.setColour (borderColour);
-    g.strokePath (p, juce::PathStrokeType (thickness));
+    g.strokePath (p, juce::PathStrokeType (2.0f));
     
     g.setFont (titleFont);
     // Draw title in the center of the tab
@@ -1835,15 +1834,15 @@ void SH201AudioProcessorEditor::paint (juce::Graphics& g)
     drawSectionFrame (g, { 15,  290, 390, 190 }, "OSCILLATOR 1", silverBg, silverText, silverBorder, true);
     drawSectionFrame (g, { 420, 290, 390, 190 }, "OSCILLATOR 2", silverBg, silverText, silverBorder, true);
     drawSectionFrame (g, { 825, 290, 240, 190 }, "MIX / MOD", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 1080, 290, 185, 190 }, "PITCH ENV", darkBg, darkText, borderColor, true);
+    drawSectionFrame (g, { 1080, 290, 185, 190 }, "PITCH ENV", darkBg, darkText, darkBorder, true);
 
     drawSectionFrame (g, { 15,  495, 420, 214 }, "FILTER", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 450, 495, 470, 214 }, "FILTER ENVELOPE", darkBg, darkText, borderColor, true);
-    drawSectionFrame (g, { 935, 495, 330, 214 }, "AMP ENVELOPE", darkBg, darkText, borderColor, true);
+    drawSectionFrame (g, { 450, 495, 470, 214 }, "FILTER ENVELOPE", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, { 935, 495, 330, 214 }, "AMP ENVELOPE", darkBg, darkText, darkBorder, true);
 
     drawSectionFrame (g, { 15,  724, 420, 190 }, "AMP & OVERDRIVE", silverBg, silverText, silverBorder, true);
-    drawSectionFrame (g, { 450, 724, 405, 190 }, "LFO 1  ", darkBg, darkText, borderColor, true);
-    drawSectionFrame (g, { 870, 724, 395, 190 }, "LFO 2  ", darkBg, darkText, borderColor, true);
+    drawSectionFrame (g, { 450, 724, 405, 190 }, "LFO 1  ", darkBg, darkText, darkBorder, true);
+    drawSectionFrame (g, { 870, 724, 395, 190 }, "LFO 2  ", darkBg, darkText, darkBorder, true);
 
     // Draw visual linking lines for Osc 1 and 2 pitch wide dropdowns
     auto drawPitchLine = [this, &g] (const juce::String& prefix, bool isOsc1)
